@@ -20,6 +20,10 @@ configurations {
 }
 
 repositories {
+	mavenLocal()
+	flatDir {
+		dirs 'libs'
+	}
 	mavenCentral()
 }
 
@@ -34,6 +38,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'tr.gov.gib:gibcore:latest.integration'
 }
 
 tasks.named('test') {
