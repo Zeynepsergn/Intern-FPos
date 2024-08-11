@@ -2,6 +2,8 @@ package tr.gov.gib.fpos.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,8 +14,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpStatusCodeException;
 import tr.gov.gib.fpos.object.request.FPosKartBilgiRequest;
 import tr.gov.gib.fpos.object.request.BankaServerRequest;
+import tr.gov.gib.fpos.object.request.OdemeServisRequest;
 import tr.gov.gib.fpos.object.response.BankaServerResponse;
+import tr.gov.gib.fpos.object.response.FPosResponse;
+import tr.gov.gib.fpos.object.response.OdemeServisResponse;
 import tr.gov.gib.fpos.service.FPosService;
+import tr.gov.gib.gibcore.object.response.GibResponse;
+import tr.gov.gib.gibcore.object.reuest.GibRequest;
 
 import java.math.BigDecimal;
 
@@ -28,6 +35,32 @@ public class FPosServiceImpl implements FPosService {
     public FPosServiceImpl() {
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
+    }
+    private static final Logger logger = LoggerFactory.getLogger(FPosServiceImpl.class);
+
+    @Override
+    public GibResponse<FPosResponse> processOdemeServisRequest(GibRequest<OdemeServisRequest> request) {
+        // Log the request data
+        logger.info("Processing OdemeServisRequest data: {}", request.getData());
+
+        // Extract specific data from the request
+        OdemeServisRequest odemeRequest = request.getData();
+        String kartSahibi = odemeRequest.getKartSahibi();
+        BigDecimal odenecekMiktar = odemeRequest.getOdenecekMiktar();
+
+        // Create and return FPosResponse with extracted values
+        FPosResponse response = new FPosResponse();
+        response.setOid(odemeRequest.getOid());
+        response.setOdemeOid(odemeRequest.getOdemeOid());
+        response.setDurum((short) 1);
+        response.setPosIslemId(odemeRequest.getPosIslemId());
+        response.setAciklama("Payment processed successfully");
+
+        // Wrap the response in a GibResponse
+        GibResponse<FPosResponse> gibResponse = new GibResponse<>();
+        gibResponse.setData(response);
+
+        return gibResponse;
     }
 
     @Override
