@@ -2,6 +2,7 @@ package tr.gov.gib.fpos.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,8 +19,8 @@ import java.math.BigDecimal;
 
 @Service("FPosService")
 public class FPosServiceImpl implements FPosService {
-
-    private static final String BANK_ENDPOINT_PHYSICAL = "http://127.0.0.1:5000/odeme_al/fiziksel_pos";
+    @Value("${banka.servis.url}")
+    private String BANK_ENDPOINT_PHYSICAL;
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
@@ -84,7 +85,7 @@ public class FPosServiceImpl implements FPosService {
                     .oid(jsonNode.path("oid").asText(null))
                     .message(jsonNode.path("message").asText(null))
                     .status(jsonNode.path("status").asText(null))
-                    .bankaAdi(jsonNode.path("bankaAdi").asText(null))
+                    .bankaAdi(jsonNode.path("banka_adi").asText(null))
                     .posId(jsonNode.path("posId").asInt(0))
                     .build();
 
