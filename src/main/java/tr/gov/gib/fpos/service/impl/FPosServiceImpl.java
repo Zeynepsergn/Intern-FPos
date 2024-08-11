@@ -1,85 +1,95 @@
 package tr.gov.gib.fpos.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
-import tr.gov.gib.fpos.object.request.FPosSorguRequest;
-import tr.gov.gib.fpos.object.response.FPosResponse;
-import tr.gov.gib.fpos.service.FPosService;
-import tr.gov.gib.gibcore.object.response.GibResponse;
-import org.springframework.core.ParameterizedTypeReference;
-import java.math.BigDecimal;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.HttpStatusCodeException;
+import tr.gov.gib.fpos.object.request.FPosKartBilgiRequest;
+import tr.gov.gib.fpos.object.request.BankaServerRequest;
+import tr.gov.gib.fpos.object.response.BankaServerResponse;
+import tr.gov.gib.fpos.service.FPosService;
+
+import java.math.BigDecimal;
 
 @Service("FPosService")
 public class FPosServiceImpl implements FPosService {
 
-    @Autowired
-    private WebClient webClient;
+    private static final String BANK_ENDPOINT_PHYSICAL = "http://127.0.0.1:5000/odeme_al/fiziksel_pos";
 
-    private static final String BANK_ENDPOINT = "http://localhost:7010/odeme_al";
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-    public GibResponse<FPosResponse> kartBilgileriniAl(FPosSorguRequest request) {
-        FPosResponse fPosResponse = createFPosResponse(request);
+    public FPosServiceImpl() {
+        this.restTemplate = new RestTemplate();
+        this.objectMapper = new ObjectMapper();
+    }
 
-        GibResponse<FPosResponse> result = new GibResponse<>();
-        result.setData(fPosResponse);
-
+    @Override
+    public BankaServerResponse kartBilgileriniAl(FPosKartBilgiRequest request) {
         try {
-            // Send the response to the bank endpoint and get the response
-            return sendToBankEndpoint(result);
-        } catch (JsonProcessingException e) {
+            // Create the request payload
+            BankaServerRequest bankaRequest = createBankaServerRequest(request);
+
+            // Send the request to the bank endpoint and get the response
+            BankaServerResponse bankResponse = sendToBankEndpoint(bankaRequest);
+
+            return bankResponse;
+        } catch (Exception e) {
             // Handle the exception
             e.printStackTrace();
-            // Return an appropriate response or rethrow the exception
-            throw new RuntimeException("Error processing JSON", e);
+            throw new RuntimeException("Error processing request", e);
         }
     }
 
-    private FPosResponse createFPosResponse(FPosSorguRequest request) {
-        BigDecimal bd1 = new BigDecimal("123.45");
-        return FPosResponse.builder()
+    private BankaServerRequest createBankaServerRequest(FPosKartBilgiRequest request) {
+        // Manually set oid and OdenecekTutar for demonstration
+        BigDecimal bd1 = new BigDecimal("100.23");
+        return BankaServerRequest.builder()
                 .kartNo(request.getKartNo())
                 .ccv(request.getCcv())
                 .sonKullanimTarihiAy(request.getSonKullanimTarihiAy())
                 .sonKullanimTarihiYil(request.getSonKullanimTarihiYil())
                 .kartSahibiAd(request.getKartSahibiAd())
                 .kartSahibiSoyad(request.getKartSahibiSoyad())
-                .oid("1234") // Manually set oid
+                .oid("12345") // Manually set oid
                 .odenecekTutar(bd1) // Manually set OdenecekTutar
                 .build();
     }
 
-    private GibResponse<FPosResponse> sendToBankEndpoint(GibResponse<FPosResponse> response) throws JsonProcessingException {
+    private BankaServerResponse sendToBankEndpoint(BankaServerRequest request) {
         try {
-            String bankResponse = webClient.post()
-                    .uri(BANK_ENDPOINT)
-                    .body(Mono.just(response), GibResponse.class)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
+            // Prepare request entity
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            HttpEntity<BankaServerRequest> requestEntity = new HttpEntity<>(request, headers);
+
+            // Send POST request
+            ResponseEntity<JsonNode> bankResponse = restTemplate.exchange(
+                    BANK_ENDPOINT_PHYSICAL,
+                    HttpMethod.POST,
+                    requestEntity,
+                    JsonNode.class
+            );
 
             // Parse the JSON response
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(bankResponse);
+            JsonNode jsonNode = bankResponse.getBody();
 
-            // Create FPosResponse from JSON
-            FPosResponse fPosResponse = FPosResponse.builder()
-                    .oid(jsonNode.get("oid").asText())
-                    .message(jsonNode.get("message").asText())
-                    .status(jsonNode.get("status").asText())
+            // Create BankaServerResponse from JSON
+            BankaServerResponse bankaResponse = BankaServerResponse.builder()
+                    .oid(jsonNode.path("oid").asText(null))
+                    .message(jsonNode.path("message").asText(null))
+                    .status(jsonNode.path("status").asText(null))
+                    .bankaAdi(jsonNode.path("bankaAdi").asText(null))
+                    .posId(jsonNode.path("posId").asInt(0))
                     .build();
 
-            // Wrap in GibResponse
-            GibResponse<FPosResponse> gibResponse = new GibResponse<>();
-            gibResponse.setData(fPosResponse);
-
-            return gibResponse;
-        } catch (WebClientResponseException e) {
+            return bankaResponse;
+        } catch (HttpStatusCodeException e) {
             // Log the error details
             System.err.println("Error response code: " + e.getStatusCode());
             System.err.println("Error response body: " + e.getResponseBodyAsString());
@@ -90,7 +100,4 @@ public class FPosServiceImpl implements FPosService {
             throw e;
         }
     }
-
-
-
 }

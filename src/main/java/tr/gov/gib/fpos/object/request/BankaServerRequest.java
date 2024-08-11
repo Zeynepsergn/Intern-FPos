@@ -1,13 +1,14 @@
 package tr.gov.gib.fpos.object.request;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class FPosSorguRequest {
+@Builder
+public class BankaServerRequest {
+    private String oid;
+    private BigDecimal odenecekTutar;
     private String kartNo;
     private Integer ccv;
     private Integer sonKullanimTarihiAy;

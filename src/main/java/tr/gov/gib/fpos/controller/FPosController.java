@@ -3,13 +3,9 @@ package tr.gov.gib.fpos.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tr.gov.gib.fpos.object.request.FPosSorguRequest;
-import tr.gov.gib.fpos.object.response.FPosResponse;
+import tr.gov.gib.fpos.object.request.FPosKartBilgiRequest;
+import tr.gov.gib.fpos.object.response.BankaServerResponse;
 import tr.gov.gib.fpos.service.FPosService;
-import tr.gov.gib.gibcore.object.response.GibResponse;
-import tr.gov.gib.gibcore.object.reuest.GibRequest;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/fpos-server")
@@ -22,8 +18,8 @@ public class FPosController {
     }
 
     @PostMapping("/kart_bilgilerini_al")
-    public ResponseEntity<GibResponse<FPosResponse>> sorgula(@RequestBody GibRequest<FPosSorguRequest> request) {
-        GibResponse<FPosResponse> mukellefBorcs = fPosService.kartBilgileriniAl(request.getData());
-        return new ResponseEntity<>(mukellefBorcs, HttpStatus.OK);
+    public ResponseEntity<BankaServerResponse> kartBilgileriniAl(@RequestBody FPosKartBilgiRequest request) {
+        BankaServerResponse response = fPosService.kartBilgileriniAl(request);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

@@ -1,13 +1,8 @@
 package tr.gov.gib.fpos.service;
 
-import tr.gov.gib.fpos.object.request.FPosSorguRequest;
-import tr.gov.gib.fpos.object.response.FPosResponse;
-import tr.gov.gib.gibcore.object.response.GibResponse;
-import tr.gov.gib.gibcore.object.reuest.GibRequest;
-
-import java.util.List;
+import tr.gov.gib.fpos.object.request.FPosKartBilgiRequest;
+import tr.gov.gib.fpos.object.response.BankaServerResponse;
 
 public interface FPosService {
-    GibResponse<FPosResponse> kartBilgileriniAl(FPosSorguRequest request);
-
+    BankaServerResponse kartBilgileriniAl(FPosKartBilgiRequest request);
 }
