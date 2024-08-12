@@ -18,8 +18,10 @@ public class OdemeServisRequest {
     private String oid;
     private Integer odemeOid;
     private String kartSahibi;
-    private String kartBanka;
-    private String posIslemId;
     private BigDecimal odenecekMiktar;
     private String tckn;
+    private String kartNo;
+    private Integer ccv;
+    private Integer sonKullanimTarihiAy;
+    private Integer sonKullanimTarihiYil;
 }

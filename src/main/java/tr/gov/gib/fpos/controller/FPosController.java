@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import tr.gov.gib.fpos.object.request.FPosKartBilgiRequest;
 import tr.gov.gib.fpos.object.request.OdemeServisRequest;
-import tr.gov.gib.fpos.object.response.BankaServerResponse;
-import tr.gov.gib.fpos.object.response.FPosResponse;
 import tr.gov.gib.fpos.object.response.OdemeServisResponse;
 import tr.gov.gib.fpos.service.FPosService;
 import tr.gov.gib.gibcore.object.response.GibResponse;
@@ -25,15 +22,10 @@ public class FPosController {
         this.fPosService = fPosService;
     }
 
-    @PostMapping("/kart_bilgilerini_al")
-    public ResponseEntity<BankaServerResponse> kartBilgileriniAl(@RequestBody FPosKartBilgiRequest request) {
-        BankaServerResponse response = fPosService.kartBilgileriniAl(request);
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
     @PostMapping("/odeme_servis")
-    public ResponseEntity<GibResponse<FPosResponse>> handleOdemeServisRequest(@RequestBody GibRequest<OdemeServisRequest> request) {
+    public ResponseEntity<GibResponse<OdemeServisResponse>> handleOdemeServisRequest(@RequestBody GibRequest<OdemeServisRequest> request) {
         logger.info("Received GibRequest data: {}", request.getData());
-        GibResponse<FPosResponse> gibResponse = fPosService.processOdemeServisRequest(request);
+        GibResponse<OdemeServisResponse> gibResponse = fPosService.processOdemeServisRequest(request);
         return new ResponseEntity<>(gibResponse, HttpStatus.OK);
     }
 }
