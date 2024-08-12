@@ -12,11 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpStatusCodeException;
-import tr.gov.gib.fpos.object.request.FPosKartBilgiRequest;
 import tr.gov.gib.fpos.object.request.BankaServerRequest;
 import tr.gov.gib.fpos.object.request.OdemeServisRequest;
 import tr.gov.gib.fpos.object.response.BankaServerResponse;
-import tr.gov.gib.fpos.object.response.FPosResponse;
 import tr.gov.gib.fpos.object.response.OdemeServisResponse;
 import tr.gov.gib.fpos.service.FPosService;
 import tr.gov.gib.gibcore.object.response.GibResponse;
@@ -39,60 +37,48 @@ public class FPosServiceImpl implements FPosService {
     private static final Logger logger = LoggerFactory.getLogger(FPosServiceImpl.class);
 
     @Override
-    public GibResponse<FPosResponse> processOdemeServisRequest(GibRequest<OdemeServisRequest> request) {
+    public GibResponse<OdemeServisResponse> processOdemeServisRequest(GibRequest<OdemeServisRequest> request) {
         // Log the request data
         logger.info("Processing OdemeServisRequest data: {}", request.getData());
 
         // Extract specific data from the request
         OdemeServisRequest odemeRequest = request.getData();
-        String kartSahibi = odemeRequest.getKartSahibi();
+        String oid = odemeRequest.getOid();
         BigDecimal odenecekMiktar = odemeRequest.getOdenecekMiktar();
+        String kartNo = odemeRequest.getKartNo();
+        Integer ccv = odemeRequest.getCcv();
+        Integer sonKullanimTarihiAy = odemeRequest.getSonKullanimTarihiAy();
+        Integer sonKullanimTarihiYil = odemeRequest.getSonKullanimTarihiYil();
+        String kartSahibi = odemeRequest.getKartSahibi();
 
-        // Create and return FPosResponse with extracted values
-        FPosResponse response = new FPosResponse();
-        response.setOid(odemeRequest.getOid());
+        // Create BankaServerRequest to get card information
+        BankaServerRequest bankaRequest = BankaServerRequest.builder()
+                .oid(oid)
+                .odenecekTutar(odenecekMiktar)
+                .kartNo(kartNo)
+                .ccv(ccv)
+                .sonKullanimTarihiAy(sonKullanimTarihiAy)
+                .sonKullanimTarihiYil(sonKullanimTarihiYil)
+                .kartSahibi(kartSahibi)
+                .build();
+
+        // Get card information from the bank
+        BankaServerResponse bankaResponse = sendToBankEndpoint(bankaRequest);
+
+        // Create and return OdemeServisResponse with extracted values and bank response
+        OdemeServisResponse response = new OdemeServisResponse();
+        response.setOid(oid);
         response.setOdemeOid(odemeRequest.getOdemeOid());
         response.setDurum((short) 1);
-        response.setPosIslemId(odemeRequest.getPosIslemId());
-        response.setAciklama("Payment processed successfully");
+        response.setPosId(bankaResponse.getPosId().toString());
+        response.setAciklama(bankaResponse.getMessage());
+        response.setBankaAdi(bankaResponse.getBankaAdi());
 
         // Wrap the response in a GibResponse
-        GibResponse<FPosResponse> gibResponse = new GibResponse<>();
+        GibResponse<OdemeServisResponse> gibResponse = new GibResponse<>();
         gibResponse.setData(response);
 
         return gibResponse;
-    }
-
-    @Override
-    public BankaServerResponse kartBilgileriniAl(FPosKartBilgiRequest request) {
-        try {
-            // Create the request payload
-            BankaServerRequest bankaRequest = createBankaServerRequest(request);
-
-            // Send the request to the bank endpoint and get the response
-            BankaServerResponse bankResponse = sendToBankEndpoint(bankaRequest);
-
-            return bankResponse;
-        } catch (Exception e) {
-            // Handle the exception
-            e.printStackTrace();
-            throw new RuntimeException("Error processing request", e);
-        }
-    }
-
-    private BankaServerRequest createBankaServerRequest(FPosKartBilgiRequest request) {
-        // Manually set oid and OdenecekTutar for demonstration
-        BigDecimal bd1 = new BigDecimal("100.23");
-        return BankaServerRequest.builder()
-                .kartNo(request.getKartNo())
-                .ccv(request.getCcv())
-                .sonKullanimTarihiAy(request.getSonKullanimTarihiAy())
-                .sonKullanimTarihiYil(request.getSonKullanimTarihiYil())
-                .kartSahibiAd(request.getKartSahibiAd())
-                .kartSahibiSoyad(request.getKartSahibiSoyad())
-                .oid("12345") // Manually set oid
-                .odenecekTutar(bd1) // Manually set OdenecekTutar
-                .build();
     }
 
     private BankaServerResponse sendToBankEndpoint(BankaServerRequest request) {

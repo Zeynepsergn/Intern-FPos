@@ -3,10 +3,10 @@ package tr.gov.gib.fpos.object.response;
 import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
 @Data
 @Builder
 public class BankaServerResponse {
+    //Bunun durması lazım. Request artık Odeme Servisi üzerinden gelecek.
     private String bankaAdi;
     private String message;
     private String oid;
