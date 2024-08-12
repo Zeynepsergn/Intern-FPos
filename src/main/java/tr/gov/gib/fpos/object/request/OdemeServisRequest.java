@@ -13,8 +13,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class OdemeServisRequest {
-
-    //Odeme Response içerisindeki veri geliyor buraya.
     private String oid;
     private Integer odemeOid;
     private String kartSahibi;

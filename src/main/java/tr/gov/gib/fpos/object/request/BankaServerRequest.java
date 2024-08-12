@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class BankaServerRequest {
-    //OdemeResponse içerisindeki veri geliyor aslında. Set etme kısmını yap burayı silme.
     private String oid;
     private BigDecimal odenecekTutar;
     private String kartNo;
