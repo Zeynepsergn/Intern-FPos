@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -13,13 +14,13 @@ import java.time.OffsetDateTime;
 @Table(name = "fiziksel_pos", schema = "gsths")
 public class FizikselPos {
     @Id
-    @Size(max = 10)
+    @Size(max = 20)
     @SequenceGenerator(name = "fiziksel_pos_id_gen", sequenceName = "odeme_odeme_id_seq", allocationSize = 1)
     @Column(name = "oid", nullable = false, length = 10)
     private String oid;
 
     @Column(name = "odeme_id")
-    private String odeme;
+    private Integer odemeId;
 
     @Size(max = 100)
     @Column(name = "kart_sahibi", length = 100)
@@ -34,7 +35,7 @@ public class FizikselPos {
     private String posIslemId;
 
     @Column(name = "optime")
-    private OffsetDateTime optime;
+    private Date optime;
 
     @Column(name = "durum")
     private Short durum;

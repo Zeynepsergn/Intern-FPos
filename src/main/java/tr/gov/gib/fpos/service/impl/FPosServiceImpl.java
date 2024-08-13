@@ -12,29 +12,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpStatusCodeException;
+import tr.gov.gib.fpos.entity.FizikselPos;
 import tr.gov.gib.fpos.object.request.BankaServerRequest;
 import tr.gov.gib.fpos.object.request.OdemeServisRequest;
 import tr.gov.gib.fpos.object.response.BankaServerResponse;
 import tr.gov.gib.fpos.object.response.OdemeServisResponse;
+import tr.gov.gib.fpos.repository.FPosRepository;
 import tr.gov.gib.fpos.service.FPosService;
 import tr.gov.gib.gibcore.object.response.GibResponse;
 import tr.gov.gib.gibcore.object.reuest.GibRequest;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Service("FPosService")
 public class FPosServiceImpl implements FPosService {
+
     @Value("${banka.servis.url}")
     private String BANK_ENDPOINT_PHYSICAL;
+    private static final Logger logger = LoggerFactory.getLogger(FPosServiceImpl.class);
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final FPosRepository fPosRepository;
 
-    public FPosServiceImpl() {
+    public FPosServiceImpl(FPosRepository fPosRepository) {
         this.restTemplate = new RestTemplate();
         this.objectMapper = new ObjectMapper();
+        this.fPosRepository = fPosRepository;
     }
-    private static final Logger logger = LoggerFactory.getLogger(FPosServiceImpl.class);
+
 
     @Override
     public GibResponse<OdemeServisResponse> processOdemeServisRequest(GibRequest<OdemeServisRequest> request) {
@@ -73,6 +80,16 @@ public class FPosServiceImpl implements FPosService {
         response.setPosId(bankaResponse.getPosId().toString());
         response.setAciklama(bankaResponse.getMessage());
         response.setBankaAdi(bankaResponse.getBankaAdi());
+
+        FizikselPos fizikselPos = new FizikselPos();
+        fizikselPos.setOid(oid);
+        fizikselPos.setOdemeId(odemeRequest.getOdemeOid());
+        fizikselPos.setKartSahibi(kartSahibi);
+        fizikselPos.setKartBanka(bankaResponse.getBankaAdi());
+        fizikselPos.setPosIslemId(bankaResponse.getPosId().toString());
+        fizikselPos.setOptime(new Date());
+        fizikselPos.setDurum((short) 0);
+        fPosRepository.save(fizikselPos);
 
         // Wrap the response in a GibResponse
         GibResponse<OdemeServisResponse> gibResponse = new GibResponse<>();
