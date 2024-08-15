@@ -1,0 +1,41 @@
+server:
+  port: ${PORT}
+
+banka:
+  servis:
+    url: ${BANKA_URL}
+
+spring:
+  application:
+    name: FPos
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        ddl-auto: none
+        naming:
+          physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+          implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl
+        default_schema: ${DB_SCHEMA}
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+
+swagger:
+  info:
+    title: ${SWAGGER_TITLE}
+    version: ${SWAGGER_VERSION}
+    description: ${SWAGGER_DSC}
+    termsOfService: ${SWAGGER_TOS}
+    contact:
+      name: ${SWAGGER_NAME}
+      email: ${SWAGGER_EMAIL}
