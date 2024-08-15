@@ -1,7 +1,6 @@
 package tr.gov.gib.fpos.service.impl;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.HttpStatusCodeException;
 import tr.gov.gib.fpos.entity.FizikselPos;
+import tr.gov.gib.fpos.object.enums.FPosDurum;
 import tr.gov.gib.fpos.object.request.BankaServerRequest;
 import tr.gov.gib.fpos.object.request.OdemeServisRequest;
 import tr.gov.gib.fpos.object.response.BankaServerResponse;
@@ -33,12 +33,10 @@ public class FPosServiceImpl implements FPosService {
     private static final Logger logger = LoggerFactory.getLogger(FPosServiceImpl.class);
 
     private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
     private final FPosRepository fPosRepository;
 
     public FPosServiceImpl(FPosRepository fPosRepository) {
         this.restTemplate = new RestTemplate();
-        this.objectMapper = new ObjectMapper();
         this.fPosRepository = fPosRepository;
     }
 
@@ -76,7 +74,7 @@ public class FPosServiceImpl implements FPosService {
         OdemeServisResponse response = new OdemeServisResponse();
         response.setOid(oid);
         response.setOdemeOid(odemeRequest.getOdemeOid());
-        response.setDurum((short) 1);
+        response.setDurum(FPosDurum.BASARILI_ODEME.getfPosDurumKodu());
         response.setPosId(bankaResponse.getPosId().toString());
         response.setAciklama(bankaResponse.getMessage());
         response.setBankaAdi(bankaResponse.getBankaAdi());
@@ -121,10 +119,11 @@ public class FPosServiceImpl implements FPosService {
                     .oid(jsonNode.path("oid").asText(null))
                     .message(jsonNode.path("message").asText(null))
                     .status(jsonNode.path("status").asText(null))
-                    .bankaAdi(jsonNode.path("banka_adi").asText(null))
+                    .bankaAdi(jsonNode.path("bankaAdi").asText(null))
                     .posId(jsonNode.path("posId").asInt(0))
                     .build();
 
+            logger.info("Processing OdemeServisRequest data: {}", bankaResponse);
             return bankaResponse;
         } catch (HttpStatusCodeException e) {
             // Log the error details
