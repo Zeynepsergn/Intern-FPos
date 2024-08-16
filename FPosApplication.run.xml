@@ -3,7 +3,7 @@
     <option name="ALTERNATIVE_JRE_PATH" value="22" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <envs>
-      <env name="BANKA_URL" value="http://localhost:8080/api/banka/fizikselpos-odeme" />
+      <env name="BANKA_URL" value="http://localhost:8080/api/banka/odeme" />
       <env name="DB_PASS" value="123456" />
       <env name="DB_SCHEMA" value="gsths" />
       <env name="DB_URL" value="jdbc:postgresql://localhost:5432/gib_staj" />

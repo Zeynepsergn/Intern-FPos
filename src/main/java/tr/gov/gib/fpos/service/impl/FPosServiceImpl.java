@@ -19,7 +19,7 @@ import tr.gov.gib.fpos.object.response.BankaServerResponse;
 import tr.gov.gib.fpos.object.response.OdemeServisResponse;
 import tr.gov.gib.fpos.repository.FPosRepository;
 import tr.gov.gib.fpos.service.FPosService;
-import tr.gov.gib.fpos.util.HashUtil;
+import tr.gov.gib.gibcore.util.HashUtil;
 import tr.gov.gib.gibcore.object.response.GibResponse;
 import tr.gov.gib.gibcore.object.reuest.GibRequest;
 
@@ -58,8 +58,8 @@ public class FPosServiceImpl implements FPosService {
         String kartSahibi = odemeRequest.getKartSahibi();
 
 
-        String hash = HashUtil.generateSHA256(oid, kartNo, odenecekMiktar.toString());
-        System.out.println("Hash: " + hash);
+        String generatedHash = HashUtil.generateSHA256(oid, kartNo, odenecekMiktar.toString());
+        System.out.println("Hash: " + generatedHash);
         // Create BankaServerRequest to get card information
         BankaServerRequest bankaRequest = BankaServerRequest.builder()
                 .oid(oid)
@@ -73,31 +73,36 @@ public class FPosServiceImpl implements FPosService {
 
         // Get card information from the bank
         BankaServerResponse bankaResponse = sendToBankEndpoint(bankaRequest);
+        // Compare the generated hash with the hash returned from the bank
+        if (generatedHash.equals(bankaResponse.getHash())) {
+            // Create and return OdemeServisResponse with extracted values and bank response
+            OdemeServisResponse response = new OdemeServisResponse();
+            response.setOid(oid);
+            response.setOdemeOid(odemeRequest.getOdemeOid());
+            response.setDurum(FPosDurum.BASARILI_ODEME.getfPosDurumKodu());
+            response.setPosId(bankaResponse.getPosId().toString());
+            response.setAciklama(bankaResponse.getMessage());
+            response.setBankaAdi(bankaResponse.getBankaAdi());
 
-        // Create and return OdemeServisResponse with extracted values and bank response
-        OdemeServisResponse response = new OdemeServisResponse();
-        response.setOid(oid);
-        response.setOdemeOid(odemeRequest.getOdemeOid());
-        response.setDurum(FPosDurum.BASARILI_ODEME.getfPosDurumKodu());
-        response.setPosId(bankaResponse.getPosId().toString());
-        response.setAciklama(bankaResponse.getMessage());
-        response.setBankaAdi(bankaResponse.getBankaAdi());
+            FizikselPos fizikselPos = new FizikselPos();
+            fizikselPos.setOid(oid);
+            fizikselPos.setOdemeId(odemeRequest.getOdemeOid());
+            fizikselPos.setKartSahibi(kartSahibi);
+            fizikselPos.setKartBanka(bankaResponse.getBankaAdi());
+            fizikselPos.setPosIslemId(bankaResponse.getPosId().toString());
+            fizikselPos.setOptime(new Date());
+            fizikselPos.setDurum((short) 0);
+            fPosRepository.save(fizikselPos);
 
-        FizikselPos fizikselPos = new FizikselPos();
-        fizikselPos.setOid(oid);
-        fizikselPos.setOdemeId(odemeRequest.getOdemeOid());
-        fizikselPos.setKartSahibi(kartSahibi);
-        fizikselPos.setKartBanka(bankaResponse.getBankaAdi());
-        fizikselPos.setPosIslemId(bankaResponse.getPosId().toString());
-        fizikselPos.setOptime(new Date());
-        fizikselPos.setDurum((short) 0);
-        fPosRepository.save(fizikselPos);
+            // Wrap the response in a GibResponse
+            GibResponse<OdemeServisResponse> gibResponse = new GibResponse<>();
+            gibResponse.setData(response);
 
-        // Wrap the response in a GibResponse
-        GibResponse<OdemeServisResponse> gibResponse = new GibResponse<>();
-        gibResponse.setData(response);
-
-        return gibResponse;
+            return gibResponse;
+        } else {
+            // Handle hash mismatch case
+            throw new RuntimeException("Hash mismatch: Generated hash does not match the bank's hash.");
+        }
     }
 
     private BankaServerResponse sendToBankEndpoint(BankaServerRequest request) {
@@ -125,6 +130,7 @@ public class FPosServiceImpl implements FPosService {
                     .status(jsonNode.path("status").asText(null))
                     .bankaAdi(jsonNode.path("bankaAdi").asText(null))
                     .posId(jsonNode.path("posId").asInt(0))
+                    .hash(jsonNode.path("hash").asText(null))
                     .build();
 
             logger.info("Processing OdemeServisRequest data: {}", bankaResponse);
@@ -140,4 +146,5 @@ public class FPosServiceImpl implements FPosService {
             throw e;
         }
     }
+
 }
