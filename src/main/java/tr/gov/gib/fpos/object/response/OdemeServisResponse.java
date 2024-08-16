@@ -11,4 +11,3 @@ public class OdemeServisResponse {
     private String aciklama;
     private String bankaAdi;
 }
-

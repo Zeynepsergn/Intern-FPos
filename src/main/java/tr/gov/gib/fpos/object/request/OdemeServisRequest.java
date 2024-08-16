@@ -17,7 +17,6 @@ public class OdemeServisRequest {
     private Integer odemeOid;
     private String kartSahibi;
     private BigDecimal odenecekMiktar;
-    private String tckn;
     private String kartNo;
     private Integer ccv;
     private Integer sonKullanimTarihiAy;
