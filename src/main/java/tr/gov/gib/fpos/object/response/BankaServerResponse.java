@@ -11,4 +11,5 @@ public class BankaServerResponse {
     private String oid;
     private Integer posId;
     private String status;
+    private String hash;
 }
