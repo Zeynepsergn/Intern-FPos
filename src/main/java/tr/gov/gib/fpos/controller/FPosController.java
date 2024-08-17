@@ -9,7 +9,7 @@ import tr.gov.gib.fpos.object.request.OdemeServisRequest;
 import tr.gov.gib.fpos.object.response.OdemeServisResponse;
 import tr.gov.gib.fpos.service.FPosService;
 import tr.gov.gib.gibcore.object.response.GibResponse;
-import tr.gov.gib.gibcore.object.reuest.GibRequest;
+import tr.gov.gib.gibcore.object.request.GibRequest;
 
 @RestController
 @RequestMapping("/fpos-server")

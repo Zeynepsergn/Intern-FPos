@@ -21,7 +21,7 @@ import tr.gov.gib.fpos.repository.FPosRepository;
 import tr.gov.gib.fpos.service.FPosService;
 import tr.gov.gib.gibcore.util.HashUtil;
 import tr.gov.gib.gibcore.object.response.GibResponse;
-import tr.gov.gib.gibcore.object.reuest.GibRequest;
+import tr.gov.gib.gibcore.object.request.GibRequest;
 
 import java.math.BigDecimal;
 import java.util.Date;
