@@ -1,23 +1,18 @@
-// src/main/java/tr/gov/gib/fpos/service/impl/FPosServiceImpl.java
 package tr.gov.gib.fpos.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import tr.gov.gib.fpos.service.BankaClient;
-import tr.gov.gib.fpos.entity.FizikselPos;
-import tr.gov.gib.gibcore.object.enums.FposSposNakitDurum;
+import tr.gov.gib.fpos.service.OdemeServisResponseService;
 import tr.gov.gib.fpos.object.request.BankaServerRequest;
 import tr.gov.gib.fpos.object.request.OdemeServisRequest;
 import tr.gov.gib.fpos.object.response.BankaServerResponse;
 import tr.gov.gib.fpos.object.response.OdemeServisResponse;
-import tr.gov.gib.fpos.repository.FPosRepository;
 import tr.gov.gib.fpos.service.FPosService;
 import tr.gov.gib.gibcore.util.HashUtil;
 import tr.gov.gib.gibcore.object.response.GibResponse;
 import tr.gov.gib.gibcore.object.request.GibRequest;
-
-import java.util.Date;
 
 @Service("FPosService")
 public class FPosServiceImpl implements FPosService {
@@ -25,11 +20,11 @@ public class FPosServiceImpl implements FPosService {
     private static final Logger logger = LoggerFactory.getLogger(FPosServiceImpl.class);
 
     private final BankaClient bankaClient;
-    private final FPosRepository fPosRepository;
+    private final OdemeServisResponseService odemeServisResponseService;
 
-    public FPosServiceImpl(BankaClient bankaClient, FPosRepository fPosRepository) {
+    public FPosServiceImpl(BankaClient bankaClient, OdemeServisResponseService odemeServisResponseService) {
         this.bankaClient = bankaClient;
-        this.fPosRepository = fPosRepository;
+        this.odemeServisResponseService = odemeServisResponseService;
     }
 
     @Override
@@ -46,23 +41,8 @@ public class FPosServiceImpl implements FPosService {
         BankaServerResponse bankaResponse = bankaClient.sendToBankEndpoint(bankaRequest);
 
         if (generatedHash.equals(bankaResponse.getHash())) {
-            OdemeServisResponse response = new OdemeServisResponse();
-            response.setOid(odemeRequest.getOid());
-            response.setOdemeOid(odemeRequest.getOdemeOid());
-            response.setDurum(FposSposNakitDurum.BASARILI_ODEME.getSposFposNakitDurumKodu());
-            response.setPosId(bankaResponse.getPosId().toString());
-            response.setAciklama(bankaResponse.getMessage());
-            response.setBankaAdi(bankaResponse.getBankaAdi());
-
-            FizikselPos fizikselPos = new FizikselPos();
-            fizikselPos.setOid(odemeRequest.getOid());
-            fizikselPos.setOdemeId(odemeRequest.getOdemeOid());
-            fizikselPos.setKartSahibi(odemeRequest.getKartSahibi());
-            fizikselPos.setKartBanka(bankaResponse.getBankaAdi());
-            fizikselPos.setPosIslemId(bankaResponse.getPosId().toString());
-            fizikselPos.setOptime(new Date());
-            fizikselPos.setDurum((short) 0);
-            fPosRepository.save(fizikselPos);
+            OdemeServisResponse response = odemeServisResponseService.createOdemeServisResponse().apply(odemeRequest, bankaResponse);
+            odemeServisResponseService.createFizikselPos().apply(odemeRequest, bankaResponse);
 
             GibResponse<OdemeServisResponse> gibResponse = new GibResponse<>();
             gibResponse.setData(response);
