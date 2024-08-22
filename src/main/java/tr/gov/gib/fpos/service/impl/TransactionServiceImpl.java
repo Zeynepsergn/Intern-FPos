@@ -20,7 +20,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public BiFunction<OdemeServisRequest, BankaServerResponse, FizikselPos> createFizikselPos() {
+    public BiFunction<OdemeServisRequest, BankaServerResponse, FizikselPos> createFizikselPosData() {
         return (odemeRequest, bankaResponse) -> {
             FizikselPos fizikselPos = new FizikselPos();
             fizikselPos.setOid(odemeRequest.getOid());

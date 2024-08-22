@@ -11,6 +11,7 @@ import tr.gov.gib.fpos.object.request.OdemeServisRequest;
 import tr.gov.gib.fpos.object.response.BankaServerResponse;
 import tr.gov.gib.fpos.object.response.OdemeServisResponse;
 import tr.gov.gib.fpos.service.FPosService;
+import tr.gov.gib.gibcore.exception.GibException;
 import tr.gov.gib.gibcore.util.HashUtil;
 import tr.gov.gib.gibcore.object.response.GibResponse;
 import tr.gov.gib.gibcore.object.request.GibRequest;
@@ -45,14 +46,14 @@ public class FPosServiceImpl implements FPosService {
 
         if (generatedHash.equals(bankaResponse.getHash())) {
             OdemeServisResponse response = odemeResponseService.createOdemeServisResponse().apply(odemeRequest, bankaResponse);
-            transactionService.createFizikselPos().apply(odemeRequest, bankaResponse);
+            transactionService.createFizikselPosData().apply(odemeRequest, bankaResponse);
 
             GibResponse<OdemeServisResponse> gibResponse = new GibResponse<>();
             gibResponse.setData(response);
 
             return gibResponse;
         } else {
-            throw new RuntimeException("Hash mismatch: Generated hash does not match the bank's hash.");
+            throw new GibException("Hash mismatch: Generated hash does not match the bank's hash.");
         }
     }
 }
