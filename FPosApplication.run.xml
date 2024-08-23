@@ -3,6 +3,7 @@
     <option name="ALTERNATIVE_JRE_PATH" value="22" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <envs>
+      <env name="BANKA_SALT" value="38A74D716E65EB18D3331B4CE54013555BA388034508496FBE3A0BACECAAC6C7" />
       <env name="BANKA_URL" value="http://localhost:8080/api/banka/odeme" />
       <env name="DB_PASS" value="123456" />
       <env name="DB_SCHEMA" value="gsths" />

@@ -15,4 +15,5 @@ SWAGGER_DSC=Fiziksel Pos service ile ilgili islemleri yapan servistir;
 SWAGGER_TOS=https://gib.gov.tr;
 SWAGGER_NAME=Hüseyin Enes Gökçe;
 SWAGGER_EMAIL=huseyin.enes.gokce@gelirler.gov.tr;
+BANKA_SALT=38A74D716E65EB18D3331B4CE54013555BA388034508496FBE3A0BACECAAC6C7;
 </pre>

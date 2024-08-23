@@ -4,6 +4,8 @@ server:
 banka:
   servis:
     url: ${BANKA_URL}
+    salt: ${BANKA_SALT}
+
 
 spring:
   application:
