@@ -2,6 +2,7 @@ package tr.gov.gib.fpos.service.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tr.gov.gib.fpos.service.BankaClient;
 import tr.gov.gib.fpos.service.OdemeResponseService;
@@ -25,6 +26,9 @@ public class FPosServiceImpl implements FPosService {
     private final TransactionService transactionService;
     private final OdemeResponseService odemeResponseService;
 
+    @Value("${banka.servis.salt}")
+    private String salt;
+
     public FPosServiceImpl(BankaClient bankaClient, TransactionService transactionService, OdemeResponseService odemeResponseService) {
         this.bankaClient = bankaClient;
         this.transactionService = transactionService;
@@ -36,8 +40,8 @@ public class FPosServiceImpl implements FPosService {
         logger.info("Processing OdemeServisRequest data: {}", request.getData());
 
         OdemeServisRequest odemeRequest = request.getData();
-
-        String generatedHash = HashUtil.generateSHA256(odemeRequest.getOid(), odemeRequest.getKartNo(), odemeRequest.getOdenecekMiktar().toString());
+        System.out.println("odemeRequest: " + odemeRequest);
+        String generatedHash = HashUtil.generateSHA256(odemeRequest.getOid(), odemeRequest.getKartNo(), odemeRequest.getOdenecekMiktar().toString(),salt);
         System.out.println("Hash: " + generatedHash);
 
         BankaServerRequest bankaRequest = new BankaServerRequest(odemeRequest);
@@ -45,6 +49,7 @@ public class FPosServiceImpl implements FPosService {
         BankaServerResponse bankaResponse = bankaClient.sendToBankEndpoint(bankaRequest);
 
         if (generatedHash.equals(bankaResponse.getHash())) {
+            System.out.println("Banka Hash: " + bankaResponse.getHash());
             OdemeServisResponse response = odemeResponseService.createOdemeServisResponse().apply(odemeRequest, bankaResponse);
             transactionService.createFizikselPosData().apply(odemeRequest, bankaResponse);
 
