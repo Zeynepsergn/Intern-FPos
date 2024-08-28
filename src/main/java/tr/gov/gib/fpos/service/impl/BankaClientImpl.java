@@ -20,7 +20,7 @@ import tr.gov.gib.fpos.service.BankaClient;
 public class BankaClientImpl implements BankaClient {
 
     @Value("${banka.servis.url}")
-    private String BANK_ENDPOINT_PHYSICAL;
+    private String BANK_ENDPOINT;
     private static final Logger logger = LoggerFactory.getLogger(BankaClientImpl.class);
 
     private final RestTemplate restTemplate;
@@ -37,7 +37,7 @@ public class BankaClientImpl implements BankaClient {
             HttpEntity<BankaServerRequest> requestEntity = new HttpEntity<>(request, headers);
 
             ResponseEntity<JsonNode> bankResponse = restTemplate.exchange(
-                    BANK_ENDPOINT_PHYSICAL,
+                    BANK_ENDPOINT,
                     HttpMethod.POST,
                     requestEntity,
                     JsonNode.class

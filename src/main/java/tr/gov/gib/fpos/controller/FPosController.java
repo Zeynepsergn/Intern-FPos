@@ -12,7 +12,7 @@ import tr.gov.gib.gibcore.object.response.GibResponse;
 import tr.gov.gib.gibcore.object.request.GibRequest;
 
 @RestController
-@RequestMapping("/fpos-server")
+//@RequestMapping("/fpos-server")
 public class FPosController {
 
     private final FPosService fPosService;
@@ -22,7 +22,7 @@ public class FPosController {
         this.fPosService = fPosService;
     }
 
-    @PostMapping("/odeme_servis")
+    @PostMapping("/fposOdemeYap")
     public ResponseEntity<GibResponse<OdemeServisResponse>> handleOdemeServisRequest(@RequestBody GibRequest<OdemeServisRequest> request) {
         logger.info("Received GibRequest data: {}", request.getData());
         GibResponse<OdemeServisResponse> gibResponse = fPosService.processOdemeServisRequest(request);

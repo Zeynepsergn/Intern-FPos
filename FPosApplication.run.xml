@@ -3,22 +3,15 @@
     <option name="ALTERNATIVE_JRE_PATH" value="22" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <envs>
-      <env name="BANKA_SALT" value="38A74D716E65EB18D3331B4CE54013555BA388034508496FBE3A0BACECAAC6C7" />
-      <env name="BANKA_URL" value="http://localhost:8080/api/banka/odeme" />
-      <env name="DB_PASS" value="123456" />
-      <env name="DB_SCHEMA" value="gsths" />
       <env name="DB_URL" value="jdbc:postgresql://localhost:5432/gib_staj" />
       <env name="DB_USER" value="postgres" />
-      <env name="PORT" value="7030" />
-      <env name="SWAGGER_DSC" value="Fiziksel Pos service ile ilgili islemleri yapan servistir" />
-      <env name="SWAGGER_EMAIL" value="huseyin.enes.gokce@gelirler.gov.tr" />
-      <env name="SWAGGER_NAME" value="Hüseyin Enes Gökçe" />
-      <env name="SWAGGER_TITLE" value="Fiziksel Pos Servis" />
-      <env name="SWAGGER_TOS" value="https://gib.gov.tr" />
-      <env name="SWAGGER_VERSION" value="1.0" />
+      <env name="DB_PASS" value="123456" />
+      <env name="DB_SCHEMA" value="gsths" />
+      <env name="BANKA_URL" value="http://localhost:8080/api/banka/odeme" />
+      <env name="BANKA_SALT" value="38A74D716E65EB18D3331B4CE54013555BA388034508496FBE3A0BACECAAC6C7" />
     </envs>
     <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
-    <module name="FPos.main" />
+    <module name="fpos-service.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="tr.gov.gib.fpos.FPosApplication" />
     <method v="2">
       <option name="Make" enabled="true" />
